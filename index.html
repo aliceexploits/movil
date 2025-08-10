@@ -1,324 +1,298 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="es" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exploits Móvil</title>
-  <link rel="icon" href="Icon.png" type="image/x-icon" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Exploits — Descargas (Móvil)</title>
+  <link rel="icon" href="Icon.png" type="image/png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
-      --main-color: #ff33aa;
-      --text-light: #eee;
-      --glass-blur: blur(10px);
+      --bg-1: #0b0b0b;
+      --bg-2: #0f1113;
+      --accent: #bfbfbf;
+      --muted: #a6a6a6;
+      --glass: rgba(255, 255, 255, 0.03);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
     body {
-      background: #12121e; /* fondo negro azulado muy oscuro */
-      background-image:
-        radial-gradient(circle at 30% 30%, rgba(255, 51, 170, 0.05), transparent 70%),
-        radial-gradient(circle at 70% 70%, rgba(100, 100, 255, 0.04), transparent 70%);
-      color: var(--text-light);
-      padding: 1rem;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color: #e9e9e9;
+      min-height: 100vh;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .glass-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.01));
+      border: 1px solid rgba(191, 191, 191, 0.06);
+      backdrop-filter: blur(6px);
+      border-radius: 14px;
+      box-shadow: 0 6px 30px rgba(2, 6, 23, 0.6);
+    }
+    .status-card {
+      animation: statusPulse 3s infinite;
+    }
+    @keyframes statusPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    .card-item {
       position: relative;
+      overflow: hidden;
+      background-color: var(--glass);
+      animation: cardGlow 4s infinite alternate;
+      border-radius: 0.5rem;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(2,6,23,0.7);
+    }
+    @keyframes cardGlow {
+      0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+      100% { box-shadow: 0 0 12px rgba(191,191,191,0.08); }
+    }
+    .card-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      opacity: 0.08;
+      pointer-events: none;
       z-index: 0;
     }
+    .card-item[data-status="green"]::before { background: #22c55e; }
+    .card-item[data-status="yellow"]::before { background: #facc15; }
+    .card-item[data-status="red"]::before { background: #ef4444; }
+    .card-item > * { position: relative; z-index: 2; }
 
-    /* Fondo de partículas */
-    #particles-js {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-
-    header {
-      display: flex;
-      flex-direction: column;
+    /* Botones minimalistas */
+    .btn {
+      display: inline-flex;
       align-items: center;
-      text-align: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      animation: fadeIn 1s ease-in-out forwards;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+    }
+    .btn[data-fill="green"] {
+      color: #22c55e;
+      border-color: rgba(34, 197, 94, 0.25);
+    }
+    .btn[data-fill="yellow"] {
+      color: #facc15;
+      border-color: rgba(250, 204, 21, 0.25);
+    }
+    .btn[data-fill="red"] {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .logo {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 2px solid var(--main-color);
+    #logo-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
       overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
     }
-
-    .logo img {
+    #logo-wrap img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
+      animation: floatAlice 6s ease-in-out infinite;
     }
-
-    h1 {
-      color: var(--main-color);
-      text-shadow: 0 0 8px var(--main-color);
+    @keyframes floatAlice {
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-4px) scale(1.02); }
+      100% { transform: translateY(0) scale(1); }
     }
-
-    .discord-link {
-      background-color: #7289da;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      animation: bounce 1.5s infinite;
-    }
-
-    section {
-      background-color: rgba(0, 0, 0, 0.3);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      padding: 1rem;
-      border-radius: 12px;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 0 10px var(--main-color);
-      animation: slideUp 0.8s ease-in-out forwards;
-    }
-
-    section h2 {
-      color: var(--main-color);
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .executor-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    /* Glass real tipo iOS */
-    .executor-item {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(30px) saturate(200%);
-      -webkit-backdrop-filter: blur(30px) saturate(200%);
-      border-radius: 12px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 0.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3),
-        0 4px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .executor-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      border: 1.5px solid var(--main-color);
-      overflow: hidden;
-    }
-
-    .executor-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .executor-name {
-      color: #ff77bb;
-      font-weight: 600;
-    }
-
-    .download-btn {
-      background-color: var(--main-color);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      text-decoration: none;
-    }
-
-    audio {
-      display: none;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes bounce {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-5px);
-      }
+    .animate-slideUp {
+      animation: slideUp 0.6s ease-out forwards;
     }
-
-    /* Animación para status list */
-    .status-list {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px) saturate(150%);
-      -webkit-backdrop-filter: blur(20px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 15px 20px;
-      border-radius: 10px;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2),
-        0 4px 20px rgba(0, 0, 0, 0.4);
-      margin-bottom: 30px;
-      animation: slideUp 0.8s ease-in-out forwards;
+    .discord-btn {
+      background: linear-gradient(90deg, #5865F2, #4752C4);
+      border: 1px solid rgba(255,255,255,0.08);
     }
-
-    .status-list p {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1rem;
-      color: #eee;
-      margin: 6px 0;
+    .discord-btn:hover {
+      background: linear-gradient(90deg, #6a75f5, #5964d8);
     }
-
-    .status-circle {
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .status-circle.green {
-      background-color: #4caf50;
-    }
-
-    .status-circle.purple {
-      background-color: #9c27b0;
-    }
-
-    .status-circle.yellow {
-      background-color: #ffc107;
-    }
-
-    .status-circle.red {
-      background-color: #f44336;
+    @media (max-width: 640px) {
+      .site { padding: 1rem; }
+      header { flex-direction: column; text-align: center; gap: 1rem; }
+      header img { width: 56px; height: 56px; }
     }
   </style>
 </head>
-
 <body>
-  <!-- Partículas de fondo -->
-  <div id="particles-js"></div>
+  <canvas id="particle-canvas"></canvas>
+  <div class="site relative z-10 max-w-md mx-auto my-6">
+    <main class="glass-card p-4">
+      <header class="flex items-center gap-4 mb-6">
+        <div id="logo-wrap" class="w-14 h-14 rounded-full overflow-hidden">
+          <img src="Yoop.jpg" alt="Alice" class="w-full h-full object-cover" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-xl font-semibold text-accent font-serif">Descargas Alice</h1>
+          <p class="mt-1 text-sm text-muted">Ejecutores Android & iOS</p>
+        </div>
+      </header>
 
-  <audio autoplay loop>
-    <source src="musica.mp3" type="audio/mpeg" />
-    Tu navegador no soporta audio.
-  </audio>
+      <section class="grid grid-cols-1 gap-3 mb-6">
+        <div class="status-card p-3 rounded-lg bg-[var(--glass)] flex items-center gap-3" data-status="green">
+          <span class="w-3 h-3 rounded-full bg-green-400"></span>
+          <div>
+            <div class="text-xs text-muted">FUNCIONANDO</div>
+            <div class="text-sm font-medium text-accent">Servicios principales</div>
+          </div>
+        </div>
+        <div class="status-card p-3 rounded-lg bg-[var(--glass)] flex items-center gap-3" data-status="yellow">
+          <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+          <div>
+            <div class="text-xs text-muted">CON PROBLEMAS</div>
+            <div class="text-sm font-medium text-accent">DNS / Mirrors</div>
+          </div>
+        </div>
+        <div class="status-card p-3 rounded-lg bg-[var(--glass)] flex items-center gap-3" data-status="red">
+          <span class="w-3 h-3 rounded-full bg-red-500"></span>
+          <div>
+            <div class="text-xs text-muted">CAÍDO</div>
+            <div class="text-sm font-medium text-accent">Esperando actualización</div>
+          </div>
+        </div>
+      </section>
 
-  <header>
-    <div class="logo">
-      <img src="Yoop.jpg" alt="logo" />
-    </div>
-    <h1>Descargas Alice</h1>
-    <a href="https://discord.gg/UEkejW2g" class="discord-link">Contáctame por Discord</a>
-  </header>
+      <section class="mb-8">
+        <h2 class="text-lg font-semibold text-accent font-serif flex items-center gap-2">
+          Ejecutores Android <i class="fa-brands fa-android text-green-400"></i>
+        </h2>
+        <ul class="mt-4 grid gap-4">
+          <li class="card-item p-4 flex items-center gap-4 animate-slideUp" data-status="green">
+            <div class="w-14 h-14 rounded-lg overflow-hidden">
+              <img src="https://media.cdnandroid.com/item_images/1453517/imagen-delta-executor-0ori.jpg" alt="Delta" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <div class="text-sm font-semibold text-accent">Delta</div>
+              <div class="text-xs text-muted">Android • Estable</div>
+              <a class="btn mt-2" data-fill="green" href="https://mega.nz/file/HMUGAYrQ#9MYcAxc0WKJ-RFYLj0kEwPj1mV5qdK0pG7lzjfE4B7k" download>
+                <i class="fa-solid fa-download"></i> Descargar
+              </a>
+            </div>
+          </li>
+          <li class="card-item p-4 flex items-center gap-4 animate-slideUp" style="animation-delay: 0.1s" data-status="green">
+            <div class="w-14 h-14 rounded-lg overflow-hidden">
+              <img src="Ronix.png" alt="Ronix Android" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <div class="text-sm font-semibold text-accent">Ronix Android</div>
+              <div class="text-xs text-muted">Android • Estable</div>
+              <a class="btn mt-2" data-fill="green" href="https://pulsar-net.github.io/alicedescargas-iOS/">
+                <i class="fa-solid fa-download"></i> Descargar
+              </a>
+            </div>
+          </li>
+        </ul>
+      </section>
 
-  <div class="status-list fade-in fade-in-delay">
-    <p><span class="status-circle green"></span> - FUNCIONANDO</p>
-    <p><span class="status-circle yellow"></span> - CON PROBLEMAS</p>
-    <p><span class="status-circle red"></span> - CAÍDO, ESPERA LA ACTUALIZACIÓN!</p>
+      <section>
+        <h2 class="text-lg font-semibold text-accent font-serif flex items-center gap-2">
+          Ejecutores iOS <i class="fa-brands fa-apple text-gray-300"></i>
+        </h2>
+        <ul class="mt-4 grid gap-4">
+          <li class="card-item p-4 flex items-center gap-4 animate-slideUp" data-status="green">
+            <div class="w-14 h-14 rounded-lg overflow-hidden">
+              <img src="https://media.cdnandroid.com/item_images/1453517/imagen-delta-executor-0ori.jpg" alt="iOS Executor" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1">
+              <div class="text-sm font-semibold text-accent">Delta (DNS)</div>
+              <div class="text-xs text-muted">iOS • Estable</div>
+              <a class="btn mt-2" data-fill="green" href="https://pulsar-net.github.io/alicedescargas-iOS/">
+                <i class="fa-solid fa-download"></i> Descargar
+              </a>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <div class="mt-8 flex justify-center">
+        <a href="https://discord.gg/TU_INVITE" target="_blank"
+          class="discord-btn flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-white shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg text-sm">
+          <i class="fa-brands fa-discord text-lg"></i> Discord
+        </a>
+      </div>
+    </main>
   </div>
 
-  <section>
-    <h2>Ejecutores Android</h2>
-    <div class="executor-list">
-      <div class="executor-item">
-        <div class="executor-icon">
-          <img src="https://media.cdnandroid.com/item_images/1453517/imagen-delta-executor-0ori.jpg" alt="Delta" />
-        </div>
-        <div class="executor-name">
-          <span class="status-circle green"></span> <br /> Delta
-        </div>
-        <a href="https://mega.nz/file/HMUGAYrQ#9MYcAxc0WKJ-RFYLj0kEwPj1mV5qdK0pG7lzjfE4B7k" class="download-btn">Descargar</a>
-      </div>
-      <div class="executor-item">
-        <div class="executor-icon">
-          <img src="Ronix.png" alt="Ronix Android" />
-        </div>
-        <div class="executor-name">
-          <span class="status-circle green"></span> <br />Ronix Android
-        </div>
-        <a href="https://mega.nz/file/fcVggYSJ#8bCqgHEMvAsbkOKSI9sQnHDmJAX8RqRY1uoyQmH8jDA" class="download-btn">Descargar</a>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>Ejecutores iOS</h2>
-    <div class="executor-list">
-      <div class="executor-item">
-        <div class="executor-icon">
-          <img src="https://media.cdnandroid.com/item_images/1453517/imagen-delta-executor-0ori.jpg" alt="Delta iOS" />
-        </div>
-        <div class="executor-name">
-          <span class="status-circle green"></span> <br />Delta iOS (Requiere DNS)
-        </div>
-        <a href="https://pulsar-net.github.io/alicedescargas-iOS/" class="download-btn">Descargar</a>
-      </div>
-    </div>
-  </section>
-
   <script>
-    if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      alert("Esta página está optimizada sólo para dispositivos móviles");
-    }
-  </script>
-
-  <!-- Partículas JS -->
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <script>
-    particlesJS("particles-js", {
-      particles: {
-        number: { value: 60, density: { enable: true, value_area: 800 } },
-        color: { value: "#ff33aa" },
-        shape: { type: "circle", stroke: { width: 0, color: "#000" } },
-        opacity: { value: 0.3, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.1, sync: false } },
-        size: { value: 3, random: true },
-        line_linked: { enable: true, distance: 150, color: "#ff33aa", opacity: 0.2, width: 1 },
-        move: { enable: true, speed: 1.5, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
-      },
-      interactivity: { detect_on: "canvas", events: { onhover: { enable: false }, onclick: { enable: false }, resize: true } },
-      retina_detect: true
-    });
+    lucide.createIcons();
+    (() => {
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        initParticles();
+      }
+      function initParticles() {
+        particles = [];
+        const count = Math.min(50, Math.floor((W * H) / 25000));
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 2.5 + 0.5,
+            alpha: Math.random() * 0.5 + 0.3,
+            speed: Math.random() * 0.3 + 0.05,
+            angle: Math.random() * Math.PI * 2
+          });
+        }
+      }
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => {
+          p.x += Math.cos(p.angle) * p.speed;
+          p.y += Math.sin(p.angle) * p.speed;
+          if (p.x < -10) p.x = W + 10;
+          if (p.x > W + 10) p.x = -10;
+          if (p.y < -10) p.y = H + 10;
+          if (p.y > H + 10) p.y = -10;
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(191,191,191,${p.alpha})`;
+          ctx.shadowColor = `rgba(191,191,191,${p.alpha})`;
+          ctx.shadowBlur = 8;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
   </script>
 </body>
-
 </html>
